@@ -11,7 +11,7 @@ REST-API для автоматического распознавания рук
 ### 1. Клонировать репозиторий
 
 ```bash
-git clone https://github.com/<ваш-логин>/digit-recognition.git
+git clone https://github.com/swirthuk/digit-recognition.git
 cd digit-recognition
 ```
 
