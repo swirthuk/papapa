@@ -16,14 +16,12 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel, field_validator
 from PIL import Image
 
-# ── Инициализация приложения ──────────────────────────────────────────────────
 app = FastAPI(
     title="Digit Recognition Service",
     description="REST-API для распознавания рукописных цифр (sklearn + SVM).",
     version="1.0.0",
 )
 
-# ── Загрузка модели при старте ────────────────────────────────────────────────
 MODEL_PATH = "models/model_pipeline.pkl"
 
 try:
@@ -36,7 +34,6 @@ except FileNotFoundError:
         "Сначала запустите: python train.py"
     )
 
-# ── Схемы данных ──────────────────────────────────────────────────────────────
 class DigitRequest(BaseModel):
     pixels: List[float]
 
@@ -59,8 +56,6 @@ class PredictionResponse(BaseModel):
     confidence: float
     needs_manual_review: bool
 
-
-# ── Вспомогательная функция: изображение → вектор пикселей ───────────────────
 def image_to_pixels(data: bytes) -> np.ndarray:
     """Конвертирует загруженное изображение в вектор 64 значений (0–16)."""
     img = Image.open(io.BytesIO(data)).convert("L")
@@ -70,8 +65,6 @@ def image_to_pixels(data: bytes) -> np.ndarray:
     arr = arr / 255.0 * 16.0
     return arr.flatten()
 
-
-# ── Эндпоинты ─────────────────────────────────────────────────────────────────
 @app.get("/health", summary="Проверка работоспособности")
 def health():
     """Возвращает статус сервиса и метрики обученной модели."""
