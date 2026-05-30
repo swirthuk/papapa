@@ -6,6 +6,22 @@ REST-API для автоматического распознавания рук
 
 ---
 
+## Структура проекта
+
+```
+digit-recognition/
+├── app.py              # FastAPI приложение
+├── requirements.txt    # Зависимости
+├── README.md
+├── .gitignore
+├── models/
+│   └── model_pipeline.pkl   # Веса модели (обучены в Google Colab)
+└── plots/
+    └── confusion_matrix.png # График качества модели
+```
+
+---
+
 ## Быстрый старт
 
 ### 1. Клонировать репозиторий
@@ -29,21 +45,26 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Обучить модель
+### 3. Положить модель в папку `models/`
 
-```bash
-python train.py
+Модель обучается в Google Colab. После обучения скачайте файл весов:
+
+```python
+# В конце Colab-ноутбука:
+from google.colab import files
+files.download("models/model_pipeline.pkl")
 ```
 
-После выполнения появится файл `models/model_pipeline.pkl` и график `plots/confusion_matrix.png`.
+Скачанный файл `model_pipeline.pkl` положите в папку `models/`.
 
-### 4. Запустить сервер
+### 4. Запустить сервер локально
 
 ```bash
 uvicorn app:app --reload
 ```
 
-Сервер будет доступен по адресу: **http://127.0.0.1:8000**
+Сервер доступен по адресу: **http://127.0.0.1:8000**  
+Swagger UI: **http://127.0.0.1:8000/docs**
 
 ---
 
@@ -60,19 +81,12 @@ uvicorn app:app --reload
 }
 ```
 
-### `GET /docs`
-Интерактивная Swagger-документация.
-
----
-
 ### `POST /predict`
-Предсказание по вектору из 64 пикселей (формат JSON).
+Предсказание по вектору из 64 пикселей (JSON).
 
-**Тело запроса:**
+**Запрос:**
 ```json
-{
-  "pixels": [0, 0, 5, 13, 9, 1, 0, 0, ...]
-}
+{ "pixels": [0, 0, 5, 13, 9, 1, 0, 0, ...] }
 ```
 
 **Ответ:**
@@ -84,14 +98,9 @@ uvicorn app:app --reload
 }
 ```
 
----
-
 ### `POST /predict/upload`
-Предсказание по загруженному изображению (PNG / JPEG / BMP).
+Предсказание по изображению (PNG / JPEG / BMP). Автоматически масштабируется до 8×8.
 
-Изображение автоматически масштабируется до 8×8 пикселей.
-
-**Пример через curl:**
 ```bash
 curl -X POST http://127.0.0.1:8000/predict/upload \
      -F "file=@digit.png"
@@ -99,26 +108,11 @@ curl -X POST http://127.0.0.1:8000/predict/upload \
 
 ---
 
-## Структура проекта
-
-```
-digit-recognition/
-├── app.py              # FastAPI приложение
-├── train.py            # Обучение и сохранение модели
-├── requirements.txt    # Зависимости
-├── README.md
-├── .gitignore
-└── models/
-    └── .gitkeep        # Папка для модели (pkl не в git)
-```
-
----
-
 ## Метрики модели (SVM, тестовая выборка)
 
-| Метрика    | Значение |
-|------------|----------|
-| Accuracy   | 0.9778   |
-| F1-macro   | 0.9776   |
+| Метрика  | Значение |
+|----------|----------|
+| Accuracy | 0.9778   |
+| F1-macro | 0.9776   |
 
-Модель обучена на встроенном датасете `sklearn.datasets.load_digits` (1 797 изображений, 8×8 пикселей, 10 классов).
+Модель обучена на `sklearn.datasets.load_digits` (1 797 изображений, 8×8 пикселей, 10 классов).
